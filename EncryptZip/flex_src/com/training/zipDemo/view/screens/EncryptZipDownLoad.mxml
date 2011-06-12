@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import com.hurlant.math.NullReduction;
+		    import mx.events.ListEvent;
+			import mx.controls.Alert;
+			import com.universalmind.cairngorm.events.Callbacks;
+			import com.hurlant.crypto.Crypto;
+			import com.hurlant.util.Hex;
+			import com.hurlant.crypto.hash.IHash;			
+			import nochump.util.zip.ZipEntry;
+			import nochump.util.zip.ZipFile;
+			import nochump.util.extend.ZipOutput2Desk;
+			import com.training.demo.model.DemoModel;
+			import com.training.demo.control.events.DemoEvent;
+			
+			[Bindable]
+			private var model:DemoModel =DemoModel.getInstance();
+			[Bindable]
+			private var _zipFile:ZipFile;
+			
+			private   var _decryptPwd:String = "David Yao";
+			private   var _newPwd:String = "David";
+			
+			public function set zipFile(zipFile:ZipFile):void {
+				_zipFile = zipFile;
+			}
+			
+			
+			private function loadZipFile():void {					
+				var callback:Callbacks   = new Callbacks(downloadResult); 
+                new DemoEvent(DemoEvent.EVENT_DOWNLOAD,null,callback).dispatch();                
+                
+			}
+			private function downloadResult(event:*):void{
+                if(model.hashData.mdByte.length>0){
+                 	if(checkMd()){                 		
+                 		model.hashData.zipByte.position = 0;
+	                 	zipFile = new ZipFile(model.hashData.zipByte);	                 	
+	                 	saveBtn.enabled= true;	
+                 	}
+                 	else{
+                 		Alert.show("Please reload as data maybe has been tampered","Tips");
+                 	}
+                 }                	 
+                 else
+                    Alert.show("There is no file exists in the server.","Tips");                              	 
+                 
+                   
+	  		}		
+	  		/**
+			 * Check the message digest of the data from the server
+		     * Currently we can support the bellow hash methods: 
+		     * SHA-256
+		     * SHA-224
+		     * SHA-1
+		     * MD5
+		     * MD2 
+		     */
+		     	
+			private function checkMd():Boolean{
+				
+				var hash:IHash = Crypto.getHash(model.hashData.hashType);
+				var mdByte:ByteArray = hash.hash(model.hashData.zipByte);
+				trace(Hex.fromArray(mdByte));	
+				trace(model.hashData.md);			
+				trace(model.hashData.hashType);			
+				return  Hex.fromArray(mdByte) == model.hashData.md;
+			}
+			
+			private function saveZipFile(data:ByteArray):void
+			{
+				
+				 var fileReference:FileReference = new FileReference();
+	  			  fileReference.addEventListener(Event.COMPLETE,onSaveCompleteResult)	  			  
+ 	  			  fileReference.save(data,"Encrypt.zip"); 	 
+			}
+			
+			/**
+			 * You could save encryptZip file directly if you do not want to change the password,
+		     * like this: saveZipFile(model.hashData.zipByte).
+		     * One more things, It's up to you that use ZipOutput2Java to prepare to 
+		     * upload the zip-data with password to the server or not.
+		     * and the code of ZipOutput2Java is very simlar with ZipOutput.
+		     */				 
+			private function saveZipWithNewPassword():void
+			{
+				 
+				var zip2Desk:ZipOutput2Desk=new ZipOutput2Desk();
+				for each (var entry:ZipEntry in _zipFile.entries)
+				{ 	
+				    zip2Desk.putNextEntry(ZipEntry(entry.clone()));					
+					zip2Desk.write(_zipFile.getInput(entry, _decryptPwd), _newPwd);
+					zip2Desk.closeEntry();
+				}
+				zip2Desk.finish();
+				saveZipFile(zip2Desk.byteArray);
+			}
+
+			
+			private function onSaveCompleteResult(event:Event):void {
+            	Alert.show("Save Successfully.","Tips");
+            	saveBtn.enabled=false;
+			} 
+			
+			private function itemClickEvent(event:ListEvent):void {
+				var entry:ZipEntry = event.currentTarget.selectedItem as ZipEntry;				
+				if(entry) 
+				 	taEntryData.text = String(_zipFile.getInput(entry, _decryptPwd));				
+				
+			}
+			
+			private function labelSize(item:Object, column:DataGridColumn):String {
+				//return sizeFormatter.format(item[column.dataField]);
+				var numSize:Number =item[column.dataField]				
+				var strReturn:String;
+				numSize = Number(numSize / 1024);
+				strReturn = String(numSize.toFixed(1) + " KB");
+				if (numSize > 1024) {
+					numSize = numSize / 1024;
+					strReturn = String(numSize.toFixed(1) + " MB");
+					if (numSize > 1024) {
+						numSize = numSize / 1024;
+						strReturn = String(numSize.toFixed(1) + " GB");
+					}
+				}				
+				return strReturn;
+			}
+			
+			private function labelModified(item:Object, column:DataGridColumn):String {
+				return dateFormatter.format(new Date(item.time));
+			}
+			
+			private function labelCrc(item:Object, column:DataGridColumn):String {
+				return item.crc.toString(16).toUpperCase();
+			}
+			
+		]]>
+	</mx:Script>
+	
+		<mx:Label id="zipFileLabel" />
+		<mx:HDividedBox width="100%" height="100%">
+			<mx:DataGrid id="dgEntries" width="100%" height="100%" dataProvider="{_zipFile.entries}" itemClick="itemClickEvent(event);">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Name" dataField="name" width="200" />
+					<mx:DataGridColumn headerText="Size" dataField="size" labelFunction="labelSize"  />
+					<mx:DataGridColumn headerText="Packed" dataField="compressedSize" labelFunction="labelSize" />
+					<mx:DataGridColumn headerText="Modified" labelFunction="labelModified" width="150" />
+					<mx:DataGridColumn headerText="CRC32" labelFunction="labelCrc"  />
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:TextArea id="taEntryData" width="400" height="100%">
+	        </mx:TextArea>
+		</mx:HDividedBox>
+		<mx:ControlBar>
+			<mx:Button id="saveBtn" label="SaveEncryptZipFile" click="{saveZipWithNewPassword()}" enabled="false"/>
+			<mx:Spacer width="100%"/>
+			<mx:Button id="optionsBtn" label="DownEncryptZipFile" click="{loadZipFile()}" />
+		</mx:ControlBar>	
+		<!-- 
+		<mx:NumberFormatter id="sizeFormatter" useThousandsSeparator="true" /> 
+		-->
+		<mx:DateFormatter id="dateFormatter" formatString="MM/DD/YYYY L:NN A" />
+</mx:Panel>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" applicationComplete="showOptionsWindow()">
+
+	<mx:Script>
+		<![CDATA[
+			import mx.events.ListEvent;
+			//import mx.logging.*;
+			import mx.managers.PopUpManager;
+			//import nochump.logger.SocketTarget;
+			import nochump.util.zip.ZipEntry;
+			import nochump.util.zip.ZipFile;
+			
+			//protected static var logger:ILogger = Log.getLogger("ZipFile");
+			//Log.addTarget(new SocketTarget());
+			
+			[Bindable]
+			private var _zipFile:ZipFile;
+			
+			internal function set zipFile(zipFile:ZipFile):void {
+				_zipFile = zipFile;
+			}
+			
+			private function showOptionsWindow():void {
+				PopUpManager.centerPopUp(PopUpManager.createPopUp(this, OptionsWindow, true));
+			}
+			
+			internal function setFileInfo(name:String, size:uint):void {
+				zipFileLabel.text = "Archive: " + name + " (" + sizeFormatter.format(size) + " bytes)";
+			}
+			
+			private function itemClickEvent(event:ListEvent):void {
+				var entry:ZipEntry = event.currentTarget.selectedItem as ZipEntry;
+				if(entry) taEntryData.text = String(_zipFile.getInput(entry));
+			}
+			
+			private function labelSize(item:Object, column:DataGridColumn):String {
+				return sizeFormatter.format(item[column.dataField]);
+			}
+			
+			private function labelModified(item:Object, column:DataGridColumn):String {
+				return dateFormatter.format(new Date(item.time));
+			}
+			
+			private function labelCrc(item:Object, column:DataGridColumn):String {
+				return item.crc.toString(16).toUpperCase();
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Style>
+		<![CDATA[
+		
+			Application {
+				paddingTop:8;
+				paddingRight:8;
+				paddingBottom:8;
+				paddingLeft:8;
+			}
+			
+			Panel {
+				borderThicknessTop:8;
+				borderThicknessRight:8;
+				borderThicknessBottom:8;
+				borderThicknessLeft:8;
+				paddingTop:4;
+				paddingRight:4;
+				paddingBottom:4;
+				paddingLeft:4;
+			}
+			
+		]]>
+	</mx:Style>
+	
+	<mx:NumberFormatter id="sizeFormatter" useThousandsSeparator="true" />
+	<mx:DateFormatter id="dateFormatter" formatString="MM/DD/YYYY L:NN A" />
+	
+ 	<mx:Panel title="Zip Demo" height="100%" width="100%">
+ 		<mx:Label id="zipFileLabel" />
+		<mx:VDividedBox width="100%" height="100%">
+			<mx:DataGrid id="dgEntries" width="100%" height="100%" dataProvider="{_zipFile.entries}" itemClick="itemClickEvent(event);">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Name" dataField="name" width="300" />
+					<mx:DataGridColumn headerText="Size" dataField="size" labelFunction="labelSize"  />
+					<mx:DataGridColumn headerText="Packed" dataField="compressedSize" labelFunction="labelSize" />
+					<mx:DataGridColumn headerText="Modified" labelFunction="labelModified" width="150" />
+					<mx:DataGridColumn headerText="CRC32" labelFunction="labelCrc" />
+				</mx:columns>
+			</mx:DataGrid>
+			<mx:TextArea id="taEntryData" width="100%" height="100%">
+	        </mx:TextArea>
+		</mx:VDividedBox>
+		<mx:ControlBar>
+			<mx:Spacer width="100%"/>
+			<mx:Button id="optionsBtn" label="Options" click="showOptionsWindow()" />
+		</mx:ControlBar>
+	</mx:Panel>
+</mx:Application>

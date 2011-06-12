@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BaseDetailForm xmlns="com.training.commons.base.*"
+	xmlns:mx="http://www.adobe.com/2006/mxml"	
+	title="订阅信息" width="100%" height="100%" >
+	<mx:Script>
+		<![CDATA[
+		import mx.messaging.messages.IMessage;
+		import com.training.demo.model.vo.User;
+		import com.cairngorm.events.Callbacks;		
+		import com.training.demo.control.events.DemoEvent;	
+		
+		private function subscribleHandler():void{
+			subscribleInfo.text = "";
+			if(btn.label == "订阅"){
+				consumer.subscribe();
+				btn.label ="取消订阅";	
+				saveDisEnable();
+			}
+			else
+			{
+				consumer.unsubscribe();
+				btn.label ="订阅";
+				user = null;
+			}
+		}
+	    private function messageHandler(message:IMessage):void{
+				user = message.body as User;		        
+		        subscribleInfo.text += "                   用户名: " + user.userName+ 
+                			  		   "                   密  码: " + user.password+ 
+                			     	   "                   状  态: " + user.state+ "\n";
+               saveEnable(null);		
+        }
+        private function saverHandler():void{
+				if(user!= null){
+					 var callback:Callbacks = new Callbacks(saveEnable);
+   				 	new DemoEvent(DemoEvent.EVENT_SAVE,user,callback).dispatch();
+   				 	saveDisEnable();	
+				}
+				else
+				{
+					mx.controls.Alert.show("暂时没有数据！","提示");
+				}
+				
+        	         		
+        } 
+        private function saveEnable(event:*):void{
+         	Savebtn.enabled = true;
+        }
+        private function saveDisEnable():void{
+         	Savebtn.enabled = false;
+        }     
+        
+        private var user:User=null;
+        
+		]]>
+	</mx:Script>	
+     <mx:TextArea id="subscribleInfo" width="100%" height="100%" />
+     <mx:HBox>
+     	<mx:Button id="btn" label="订阅" click="{subscribleHandler()}"/>
+    	<mx:Button id="Savebtn" label="保存" click="{saverHandler()}" enabled="false"/>	
+     </mx:HBox>         
+	<mx:Consumer id="consumer" destination="messageFeed" message="messageHandler(event.message)"/>
+	<mx:Producer >
+		
+	</mx:Producer>
+</BaseDetailForm >

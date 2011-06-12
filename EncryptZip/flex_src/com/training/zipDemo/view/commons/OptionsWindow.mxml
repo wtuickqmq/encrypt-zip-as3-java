@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" title="Options" showCloseButton="true" close="PopUpManager.removePopUp(this)">
+
+	<mx:Script>
+		<![CDATA[
+		
+			import flash.events.Event;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			
+			import nochump.util.zip.ZipFile;			
+			import com.cairngorm.events.Callbacks;            
+			import com.training.demo.model.DemoModel;
+			import com.training.demo.control.events.DemoEvent;
+			[Bindable]
+			private var model:DemoModel =DemoModel.getInstance();
+			
+			[Bindable]
+			private var _files:Array = ["/ziplib/nochump-ziplib-1.0-dist.zip", "/ziplib/nochump-ziplib-1.0-src.zip", "/ziplib/nochump-ziplib-1.0-docs.zip", "/ziplib/nochump-zipdemo-1.0-src.zip","E:/Zip/nochump-zipdemo-1.0-src.zip"];
+			
+			private function showOptionsWindow():void {
+				PopUpManager.centerPopUp(PopUpManager.createPopUp(this, OptionsWindow, true));
+			}
+			private function loadZipFile():void {
+				currentState = "loading";				
+				var callback:Callbacks   = new Callbacks(downloadResult); 
+                new DemoEvent(DemoEvent.EVENT_DOWNLOAD,null,callback).dispatch();                
+                
+			}
+			private function downloadResult(event:*):void{
+                 if(model.downByteArrary.length >10){
+                 	parentApplication.zipFile = new ZipFile(model.downByteArrary);
+                 	PopUpManager.removePopUp(this);
+                 }                	 
+                 else
+                    mx.controls.Alert.show("There is no file exists in the Folder.","Tips");
+	  		}
+			
+			private function errorHandler(event:ErrorEvent):void {
+				currentState = "error";
+				errorLabel.text = event.text;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:states>
+		<mx:State name="loading">
+			<mx:AddChild relativeTo="{this}" position="lastChild">
+				<mx:ProgressBar id="loadProgress" width="100%" />
+			</mx:AddChild>
+			<mx:SetProperty target="{options}" name="enabled" value="false" />
+		</mx:State>
+		<mx:State name="error">
+			<mx:AddChild relativeTo="{this}" position="lastChild">
+				<mx:Label id="errorLabel" />
+			</mx:AddChild>
+		</mx:State>
+	</mx:states>
+
+	<mx:Label text="Select a zip file and click &quot;Load&quot;." />
+	<mx:HBox id="options">
+		<mx:ComboBox id="cbFiles" dataProvider="{_files}" width="300" />
+		<mx:Button label="Load" click="loadZipFile()" />
+	</mx:HBox>
+
+</mx:TitleWindow>  

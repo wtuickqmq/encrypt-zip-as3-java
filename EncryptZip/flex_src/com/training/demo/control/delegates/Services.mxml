@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<services:ServiceLocator	xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:services="com.universalmind.cairngorm.business.*">
+	<mx:RemoteObject id="demoService" destination="demoServiceImpl"/>	
+</services:ServiceLocator>

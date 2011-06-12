@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:view="com.training.zipDemo.view.screens.*">
+	<mx:Script>
+		<![CDATA[		   
+			
+		]]>
+	</mx:Script>	
+	<mx:Style source="assets/css/zipMain.css"/>
+		
+	
+	<control:DemoController xmlns:control="com.training.demo.control.*" />
+	
+    <rds:Services id="services" xmlns:rds="com.training.demo.control.delegates.*" />    
+    <mx:ViewStack  width="1024" height="100%">
+    	<view:EncryptZipDownLoad />    	
+    </mx:ViewStack>
+    
+</mx:Application>
