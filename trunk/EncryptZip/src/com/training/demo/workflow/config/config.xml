@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd" xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.1.xsd">
+  
+  <jb:bindings beanId="user" class="com.training.demo.model.vo.User" createOnElement="USER">
+    <jb:value property="userName" decoder="String" data="USER/USERNAME"/>
+    <jb:value property="password" decoder="String" data="USER/PASSWORD"/>
+    <jb:value property="state"    decoder="Integer" data="USER/STATE"/>
+  </jb:bindings>
+</smooks-resource-list>

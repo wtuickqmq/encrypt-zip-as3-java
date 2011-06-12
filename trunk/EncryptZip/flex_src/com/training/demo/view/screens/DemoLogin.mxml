@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+	paddingBottom="0" paddingLeft="0" 
+	paddingRight="0"  paddingTop="0"
+	width="100%" height="100%"  creationComplete="generateCheckCode()">
+	<mx:Script>
+		<![CDATA[
+		import mx.controls.Alert;		
+		import com.universalmind.cairngorm.events.Callbacks;		
+		import com.training.demo.control.events.DemoEvent;		
+		import com.training.demo.model.vo.User;
+		import com.training.demo.model.DemoModel;
+		
+		[Bindable]
+		private var model:DemoModel = DemoModel.getInstance();
+		
+		
+		public function login():void{
+			
+			if(validata.text.toLocaleUpperCase() != generate.text.toLocaleUpperCase()){
+				Alert.show("验证码输入错误！","提示");
+				generateCheckCode();
+				return;
+			}
+			var user:User = new User();
+			user.userName = userName.text;
+			user.password = passWord.text;
+   			var callback:Callbacks = new Callbacks(clearInput);
+   			new DemoEvent(DemoEvent.EVENT_LOGIN,user,callback).dispatch();
+   			
+    	}
+    	
+    	private function clearInput(event:*):void{
+    		userName.text = "";
+    		passWord.text = "";
+    		validata.text = ""; 
+    	}
+    	private function setUpCase():void{
+    		validata.text = validata.text.toLocaleUpperCase();
+    	}
+   		private function generateCheckCode():void{
+	    	var num:Number;
+	    	var code:String;
+	    	var checkCode:String="";
+	    	validata.text = null;
+	    	for(var i:int=0;i<5;i++){
+	     		num=Math.round(Math.random()*100000);
+	     		if(num%2==0){
+	      			code=String.fromCharCode(48+(num%10));
+	     		}else{
+	     			code=String.fromCharCode(65+(num%26));
+	     		}
+	     		if(code == "0" || code == "O"){
+	      				code = "";
+	      				i--;
+	      		}
+	     		checkCode +=code;
+	    	}
+	    	generate.text = checkCode;
+	   }
+		]]>
+	</mx:Script>
+	
+    <mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle" borderStyle="inset">
+	      <mx:Form id="loginForm" defaultButton="{ loginBtn }">
+	      	<mx:HBox  verticalAlign="center" horizontalAlign="middle">
+		      		<mx:VBox  height="100%">
+					    	<mx:FormItem label="用户名:" color="#FFFFFF">
+					    		<mx:TextInput id="userName" width="180" height="22"  fontSize="11"  maxChars="15"  fontFamily="Arial" backgroundColor="#FFFFC4" />
+					    	</mx:FormItem>
+					    	<mx:FormItem label="密   码:" color="#FFFFFF">
+					    		<mx:TextInput id="passWord" width="180" height="22"   maxChars="15" displayAsPassword="true" fontFamily="Arial" backgroundColor="#FFFFC4" />
+					    	</mx:FormItem>
+					    	<mx:FormItem label="验证码:" color="#FFFFFF">
+						    	<mx:HBox>
+						    		<mx:TextInput id="validata" width="90" height="22"  fontSize="11"  maxChars="5" backgroundColor="#FFFFC4" fontFamily="Arial" change="setUpCase()"/>
+						    	  	<mx:Spacer width="10"/>
+						    	  	<mx:Label  id="generate"  click="generateCheckCode()" color="#FFFFFF"  height="22"/>
+						    	</mx:HBox>
+				  			</mx:FormItem> 			
+		      		</mx:VBox>
+		      		<mx:Spacer width="30"/>
+		      		<mx:VBox verticalAlign="center" horizontalAlign="middle" height="100%">
+		      			<mx:Spacer height="3"/>
+		      			<mx:LinkButton id="loginBtn"  paddingTop="0" paddingBottom="0"  paddingLeft="0" paddingRight="0" click="{login()}" />
+		      		</mx:VBox>
+		      </mx:HBox>	
+		    	<mx:Spacer height="110"/>
+		    </mx:Form>	
+    </mx:VBox>
+     
+     
+</mx:VBox>
