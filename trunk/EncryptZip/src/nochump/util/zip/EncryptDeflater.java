@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2009 David Yao (xiang.okay@gmail.com)
+ * description: Crypt the file
+ * author: David Yao
+ * mail: xiang.okay@gmail.com
+ */
 package nochump.util.zip;
 
 
