@@ -1,4 +1,9 @@
-/*
+/**
+ * Copyright (c) 2009 David Yao (xiang.okay@gmail.com)
+ * description: Crypt the file
+ * author: David Yao
+ * mail: xiang.okay@gmail.com
+ *//*
  * @(#)ZipConstants.java	1.18 03/12/19
  *
  * Copyright 2004 Sun Microsystems, Inc. All rights reserved.
