@@ -162,10 +162,13 @@ public class EncryptZipOutput extends EncryptDeflater implements ZipConstants {
 		if (names.put(e.name, e) != null) {
 			throw new ZipException("duplicate entry: " + e.name);
 		}
-
-		writeLOC(e);
+		//this is the right logic to change the encrypt flag
 		if(this.password != null){
-		    e.flag = 9;
+		    e.flag = 9;					
+		}
+		writeLOC(e);
+		
+		if(this.password != null){		    
 			writeExtData(e);			
 		}
 
