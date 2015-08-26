@@ -1,0 +1,1 @@
+> This project is based on nochump hurlant and universalmind(extends the cairngorm),that implements the function of Encrypt & Decrypt the ZipFile with password by ActionScript3 and Java Language. It also resolved the filename which is named by Chinese.BTW, Java resides on server.
